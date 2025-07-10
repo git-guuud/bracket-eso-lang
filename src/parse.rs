@@ -11,6 +11,8 @@ pub enum Token {
     OpenCurly, // {
     CloseCurly, // }
     Pipe, // |
+    Inc,
+    Dec,
     // OpenAngle, // <
     // CloseAngle, // >
 }
@@ -25,21 +27,25 @@ impl fmt::Display for Token {
             Token::OpenCurly => write!(f, "{{"),
             Token::CloseCurly => write!(f, "}}"),
             Token::Pipe => write!(f, "|"),
+            Token::Inc => write!(f, "&"),
+            Token::Dec => write!(f, "*"),
             // Token::OpenAngle => write!(f, "<"),
             // Token::CloseAngle => write!(f, ">"),
         }
     }
 }
 
-#[derive(Clone, PartialEq)]
-pub struct Var(String);
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct Var(pub String);
 impl fmt::Display for Var {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
+#[derive(Clone, PartialEq)]
 pub enum Expression {
+    Val(u32), // Represents a number 
     If(Box<Expression>, Box<Expression>, Box<Expression>), // x|y|z if x != 0 then y else z
     FunctionDef(Var, Vec<Var>, Box<Expression>), // define function x with y as argument and z as body
     FunctionCall(Var, Box<Expression>), // call function x with y as argument
@@ -49,9 +55,24 @@ pub enum Expression {
 impl fmt::Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Expression::Val(num) => write!(f, "{}", num),
             Expression::If(cond, then_branch, else_branch) => write!(f, "if ({}) then {} else {}", cond, then_branch, else_branch),
-            Expression::FunctionDef(var, args, body) => write!(f, "{}({}) {{\n{}\n}}", var.0, args.iter().map(|v| v.0.clone()).collect::<Vec<String>>().join(", "), body),
-            Expression::FunctionCall(var, arg) => write!(f, "{}({})", var.0, arg),
+
+            Expression::FunctionDef(var, args, body) => {
+                if args.is_empty() {
+                    return write!(f, "{} {{\n{}\n}}", var.0, body)
+                } else {
+                    write!(f, "{}({}) {{\n{}\n}}", var.0, args.iter().map(|v| v.0.clone()).collect::<Vec<String>>().join(", "), body)
+                }
+            }
+            
+            Expression::FunctionCall(var, args) => {
+                if **args == Expression::ListExp(Vec::new()) {
+                    return write!(f, "{}", var.0)
+                } else {
+                    write!(f, "{}({})", var.0, args)
+                }
+            }
             Expression::ListExp(exprs) => write!(f, "{}", exprs.iter().map(|e| e.to_string()).collect::<Vec<String>>().join(";\n")),
         }
     }
@@ -68,6 +89,8 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
             '{' => tokens.push(Token::OpenCurly),
             '}' => tokens.push(Token::CloseCurly),
             '|' => tokens.push(Token::Pipe),
+            '*' => tokens.push(Token::Dec),
+            '&' => tokens.push(Token::Inc),
             // '<' => tokens.push(Token::OpenAngle),
             // '>' => tokens.push(Token::CloseAngle),
             _ => {
@@ -125,16 +148,26 @@ pub fn get_next_expression(tokens: &Vec<Token>, start: usize) -> Result<(Express
         }
 
         Token::OpenSquare => {
+            if tokens[index+1] == Token::OpenParen {
+                let (num, end) = get_num(tokens, index).unwrap();
+                index = end;
+                return Ok((Expression::Val(num), index));
+            } else if tokens[index+1] == Token::CloseSquare {
+                index += 2;
+                return Ok((Expression::Val(0), index));
+            }
+            
             let (condition, end) = get_expression_list(tokens, index).unwrap();
             index = end;
 
-            if index == tokens.len() {
+            if index == tokens.len() || tokens[index] != Token::Pipe {
                 return Ok((Expression::ListExp(condition), index));
-            } else if index >= tokens.len() - 1 {
-                return Err("Unexpected end of tokens after condition".to_string());
-            } else if tokens[index] != Token::Pipe {
-                return Err("Expected Pipe after condition".to_string());
-            }
+            } 
+            // else if index >= tokens.len() - 1 {
+            //     return Err("Unexpected end of tokens after condition".to_string());
+            // } else if tokens[index] != Token::Pipe {
+            //     return Err("Expected Pipe after condition".to_string());
+            // }
             index += 1; 
 
             let (then_branch, end) = get_expression_list(tokens, index).unwrap();
@@ -155,6 +188,20 @@ pub fn get_next_expression(tokens: &Vec<Token>, start: usize) -> Result<(Express
             return Ok((Expression::If(Box::new(Expression::ListExp(condition)), 
                                         Box::new(Expression::ListExp(then_branch)), 
                                         Box::new(Expression::ListExp(else_branch))), index));
+        }
+        Token::Dec => {
+            index+=1;
+            let (body, end) = get_next_expression(tokens, index).unwrap();
+            index = end;
+            let body = Expression::ListExp(vec![body]);
+            return Ok((Expression::FunctionCall(Var('*'.to_string()), Box::new(body)), index));
+        }
+        Token::Inc => {
+            index+=1;
+            let (body, end) = get_next_expression(tokens, index).unwrap();
+            index = end;
+            let body = Expression::ListExp(vec![body]);
+            return Ok((Expression::FunctionCall(Var('&'.to_string()), Box::new(body)), index));
         }
         _ => return Err(format!("Unexpected token at {}", index)),
     }
@@ -239,3 +286,30 @@ fn get_var_list(tokens: &Vec<Token>, start: usize) -> Result<(Vec<Var>, usize), 
     Ok((vars, index))
 }
 
+fn get_num(tokens: &Vec<Token>, start: usize) -> Result<(u32, usize), String> {
+    if tokens[start] != Token::OpenSquare  && tokens[start+1] != Token::OpenParen {
+        return Err("Expected [( at start of number".to_string());
+    }
+    let mut index = start + 1;
+    let mut num = 0;
+
+    while index < tokens.len() {
+        match &tokens[index] {
+            Token::OpenParen => {
+                index += 1;
+                if tokens[index] != Token::CloseParen {
+                    return Err("Expected CloseParen after OpenParen in number".to_string());
+                }
+                num += 1;
+            }
+            Token::CloseSquare => {
+                index+=1;
+                break;
+            }
+            _ => return Err("Unexpected token in number".to_string()),
+        }
+        index += 1;
+    }
+
+    Ok((num, index))
+}
