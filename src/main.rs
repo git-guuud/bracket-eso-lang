@@ -1,8 +1,8 @@
-// bracket only valid chars -> ()[]{}|
-// var/func names -> valid bracket nestings only eg: (), (()), (()()), (()(()))
+// bracket only valid chars -> ()[]{}| 
+// var/func names -> valid bracket nestings only eg: (), (()), (()()), (()(())) 
 // numbers -> can represent as [] nesting inside () eg: 0 -> [] (equivalent to group of no statements), 
-// 1 -> [()], 2 -> [()()], 3 -> [()()()], etc.
-// Operators: *(eqivalent to --), &(equivalent to ++)
+// 1 -> [()], 2 -> [()()], 3 -> [()()()], etc. 
+// Operators: *(eqivalent to --), &(equivalent to ++) 
 // {x}[] get value of x 
 // {x}()[y] set var x to y 
 // [x] | [y] | [z] if x != 0 then y else z 
@@ -13,9 +13,8 @@
 // you can use [] to group up statements
 // value of a group of statements is the last statement in the group
 // functions/variables must be defined before use
-// only single argument functions
-// functions can be self-recursive
-// local functions and global variables not allowed
+// functions can be recursive
+// all functions are global and all variables are local to functions
 
 use std::{collections::HashMap, fs};
 
@@ -38,9 +37,9 @@ fn main() {
     let mut index = 0;
     while index < tokens.len() {
         let (exp, end) = parse::get_next_expression(&tokens, index).expect("Failed to parse code");
-        index = end;
-        println!("{}", exp);
-        let x = eval::eval_expression(&exp, &mut funcs, &mut vars).unwrap();
-        println!("Result: {}", x);
+        index = end; 
+        println!("{}", exp); 
+        let x = eval::eval_expression(&exp, &mut funcs, &mut vars).unwrap(); 
+        println!("Result: {}", x); 
     }
 }
