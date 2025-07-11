@@ -8,7 +8,7 @@
 // [x] | [y] | [z] if x != 0 then y else z 
 // {x}(y)[z] define function x with y as argument and z as body 
 // {x}[y] call function x with y as argument 
-//
+// 
 // 
 // you can use [] to group up statements
 // value of a group of statements is the last statement in the group

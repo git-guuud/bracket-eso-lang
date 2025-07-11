@@ -4,13 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <div>
-        <h1>Eso Lang</h1>
-        <textarea id="code" rows="10" cols="50"></textarea>
-        <button id="run">Run</button>
-        <pre id="output"></pre>
+<body id="full">
+    <!-- <div id="header">
+        <h1>Bracket - an eso lang</h1>
+    </div> -->
+    <div id="content">
+        <div id="left">
+            <h2>Bracket - an esoteric programming language</h2>
+
+            <h3>Numbers</h3>
+            <ul>
+                <li>Represented as nested brackets</li>
+                <li>0 &rarr; <code>[]</code> (equivalent to group of no statements)</li>
+                <li>1 &rarr; <code>[()]</code></li>
+                <li>2 &rarr; <code>[()()]</code></li>
+                <li>3 &rarr; <code>[()()()]</code></li>
+                <li>...</li>
+            </ul>
+
+            <h3>Operators</h3>
+            <ul>
+                <li><code>&amp;</code> (equivalent to <code>+1</code>)</li>
+                <li><code>*</code> (equivalent to <code>-1</code>)</li>
+            </ul>
+
+            <h3>Variables/Functions</h3>
+            <ul>
+                <li><code>{x}()[y]</code> - set value of variable <code>x</code> to <code>y</code></li>
+                <li><code>{x}[]</code> - get value of variable <code>x</code></li>
+                <li><code>{x}(y)[z]</code> - define function <code>x</code> with arguments <code>y</code> to return value <code>z</code></li>
+                <li><code>{x}[y]</code> - call function <code>x</code> with arguments <code>y</code></li>
+                <li>statements can be grouped using <code>[]</code> (value of a group is the value of the last statement in it)</li>
+            </ul>
+
+            <h3>Conditionals</h3>
+            <ul>
+                <li><code>[x] | [y] | [z]</code> - if <code>x != 0</code> then <code>y</code> else <code>z</code></li>
+            </ul>
+
+            <h3>Variable/Function Names</h3>
+            <ul>
+                <li>Valid bracket nestings only, e.g. <code>()</code>, <code>(())</code>, <code>(()())</code>, <code>(()(()))</code>, etc.</li>
+            </ul>
+        </div>
+        <div id="right">
+            <div id="bar">
+                <select id="examples"></select>
+                <button id="clear">Clear</button>
+                <button id="run">Run</button>
+            </div>
+            <textarea id="code" placeholder="Code here..."></textarea>
+            <textarea disabled id="output"></textarea>
+        </div>
     </div>
     <script type="module" src="index.js"></script>
 </body>
