@@ -4,6 +4,11 @@ use std::collections::HashMap;
 mod parse;
 mod eval;
 
+#[wasm_bindgen(module = "/site/rust_call.js")]
+extern "C" {
+    pub fn logOutput(s: &str);
+}
+
 
 #[wasm_bindgen]
 pub fn eval_unwrapped(code: String) -> String {
@@ -29,5 +34,6 @@ pub fn eval_all(code: String) -> Result<String, String> {
         let x = eval::eval_expression(&exp, &mut funcs, &mut vars)?; 
         output.push_str(format!("Result: {}", x).as_str()); 
     }
+    logOutput(format!("Code: {}\n", code).as_str());
     Ok(output)
 }

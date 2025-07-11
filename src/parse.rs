@@ -150,6 +150,9 @@ pub fn get_next_expression(tokens: &Vec<Token>, start: usize) -> Result<(Express
         }
 
         Token::OpenSquare => {
+            if index + 1 >= tokens.len() {
+                return Err("Unexpected end of tokens after [".to_string());
+            }
             if tokens[index+1] == Token::OpenParen {
                 let (num, end) = get_num(tokens, index)?;
                 index = end;
@@ -172,17 +175,22 @@ pub fn get_next_expression(tokens: &Vec<Token>, start: usize) -> Result<(Express
             // }
             index += 1; 
 
+            if index >= tokens.len() {
+                return Err("Unexpected end of tokens while trying to find then branch of conditional".to_string());
+            } 
             let (then_branch, end) = get_expression_list(tokens, index)?;
             index = end;
 
-            if index >= tokens.len() - 1 {
-                return Err("Unexpected end of tokens after then branch".to_string());
-            } else if tokens[index] != Token::Pipe {
+            if index >= tokens.len() || tokens[index] != Token::Pipe {
                 return Ok((Expression::If(Box::new(Expression::ListExp(condition)), 
                                         Box::new(Expression::ListExp(then_branch)), 
                                         Box::new(Expression::ListExp(Vec::new()))), index));
             }
             index += 1;
+
+            if index >= tokens.len() {
+                return Err("Unexpected end of tokens while trying to find else branch of conditional".to_string());
+            }
 
             let (else_branch, end) = get_expression_list(tokens, index)?;
             index = end;
@@ -193,6 +201,9 @@ pub fn get_next_expression(tokens: &Vec<Token>, start: usize) -> Result<(Express
         }
         Token::Dec => {
             index+=1;
+            if index >= tokens.len() {
+                return Err("Unexpected end of tokens after decrement operator".to_string());
+            }
             let (body, end) = get_next_expression(tokens, index)?;
             index = end;
             let body = Expression::ListExp(vec![body]);
@@ -200,6 +211,9 @@ pub fn get_next_expression(tokens: &Vec<Token>, start: usize) -> Result<(Express
         }
         Token::Inc => {
             index+=1;
+            if index >= tokens.len() {
+                return Err("Unexpected end of tokens after increment operator".to_string());
+            }
             let (body, end) = get_next_expression(tokens, index)?;
             index = end;
             let body = Expression::ListExp(vec![body]);
@@ -211,13 +225,19 @@ pub fn get_next_expression(tokens: &Vec<Token>, start: usize) -> Result<(Express
 
 fn get_expression_list(tokens: &Vec<Token>, start: usize) -> Result<(Vec<Expression>, usize), String> {
     let mut index = start;
+    if index >= tokens.len() {
+        return Err("Unexpected end of tokens while trying to find expression list".to_string());
+    }
     let mut expressions = Vec::new();
 
     if tokens[index] != Token::OpenSquare {
         return Err(format!("Expected [ at start of expression list at {}", index));
     }
     index+=1;
-    while index < tokens.len() {
+    loop {
+        if index >= tokens.len() {
+            return Err(format!("Unexpected end of tokens while parsing expression list at {}", index));
+        }
         match &tokens[index] {
             Token::CloseSquare => {
                 index += 1;
@@ -238,6 +258,9 @@ fn get_expression_list(tokens: &Vec<Token>, start: usize) -> Result<(Vec<Express
 }
 
 fn get_var_name(tokens: &Vec<Token>, start: usize) -> Result<(String, usize), String> {
+    if start >= tokens.len() {
+        return Err("Unexpected end of token while trying to find variable name".to_string());
+    }
     if tokens[start] != Token::OpenParen {
         return Err(format!("Expected OpenParen at start of variable name at {}", start));
     }
@@ -262,18 +285,27 @@ fn get_var_name(tokens: &Vec<Token>, start: usize) -> Result<(String, usize), St
             break;
         }
     }
+    if paren_count != 0 {
+        return Err("Unexpected end of tokens in variable name".to_string());
+    }
 
     Ok((var_name, index))
 }
 
 fn get_var_list(tokens: &Vec<Token>, start: usize) -> Result<(Vec<Var>, usize), String> {
+    if start >= tokens.len() {
+        return Err("Unexpected end of token while trying to find variable list".to_string());
+    }
     if tokens[start] != Token::OpenParen {
         return Err(format!("Expected ( at start of variable list at {}", start));
     }
     let mut index = start+1;
     let mut vars = Vec::new();
 
-    while index < tokens.len() {
+    loop {
+        if index >= tokens.len() {
+            return Err(format!("Unexpected end of tokens while parsing variable list at {}", index));
+        }
         match &tokens[index] {
             Token::OpenParen => {
                 let (var_name, end) = get_var_name(tokens, index)?;
@@ -289,13 +321,19 @@ fn get_var_list(tokens: &Vec<Token>, start: usize) -> Result<(Vec<Var>, usize), 
 }
 
 fn get_num(tokens: &Vec<Token>, start: usize) -> Result<(u32, usize), String> {
+    if start >= tokens.len()-1 {
+        return Err("Unexpected end of token while trying to find number".to_string());
+    }
     if tokens[start] != Token::OpenSquare  && tokens[start+1] != Token::OpenParen {
         return Err(format!("Expected [( at start of number at {}", start));
     }
     let mut index = start + 1;
     let mut num = 0;
 
-    while index < tokens.len() {
+    loop {
+        if index >= tokens.len() {
+            return Err(format!("Unexpected end of tokens while parsing number at {}", index));
+        }
         match &tokens[index] {
             Token::OpenParen => {
                 index += 1;
