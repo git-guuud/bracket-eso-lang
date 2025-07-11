@@ -22,11 +22,18 @@ mod parse;
 mod eval;
 
 
-
 fn main() {
     let code = fs::read_to_string("./mul.txt").expect("Failed to read code.txt");
-    let tokens = parse::tokenize(&code).expect("Failed to tokenize code");
-    println!("{}", tokens.iter().map(|t| t.to_string()).collect::<Vec::<String>>().join(""));
+    let output = eval_all(code).unwrap_or_else(|err| {
+        format!("Error: {}", err)
+    });
+    println!("{}", output);
+}
+
+pub fn eval_all(code: String) -> Result<String, String> {
+    let mut output = String::new();
+    let tokens = parse::tokenize(&code)?;
+    // println!("{}", tokens.iter().map(|t| t.to_string()).collect::<Vec::<String>>().join(""));
     
     let mut funcs = eval::FunctionTable{
         functions: HashMap::new(),
@@ -36,10 +43,11 @@ fn main() {
     };
     let mut index = 0;
     while index < tokens.len() {
-        let (exp, end) = parse::get_next_expression(&tokens, index).expect("Failed to parse code");
+        let (exp, end) = parse::get_next_expression(&tokens, index)?;
         index = end; 
-        println!("{}", exp); 
-        let x = eval::eval_expression(&exp, &mut funcs, &mut vars).unwrap(); 
-        println!("Result: {}", x); 
+        // println!("{}", exp); 
+        let x = eval::eval_expression(&exp, &mut funcs, &mut vars)?; 
+        output.push_str(format!("Result: {}", x).as_str()); 
     }
+    Ok(output)
 }

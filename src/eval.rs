@@ -29,7 +29,7 @@ pub fn eval_expression(
         Expression::Val(num) => Ok(*num),
 
         Expression::If(cond_exp, then_exp, else_exp) => {
-            let cond_val = eval_expression(cond_exp.as_ref(), funcs, vars).unwrap();
+            let cond_val = eval_expression(cond_exp.as_ref(), funcs, vars)?;
             if cond_val != 0 {
                 eval_expression(then_exp.as_ref(), funcs, vars)
             } else {
@@ -39,7 +39,7 @@ pub fn eval_expression(
 
         Expression::FunctionDef(var, args, body) => {
             if args.len() == 0 {
-                let result = eval_expression(body, funcs, vars).unwrap();
+                let result = eval_expression(body, funcs, vars)?;
                 vars.variables.entry(var.clone()).or_insert_with(|| { result });
                 return Ok(result)
             }
@@ -57,7 +57,7 @@ pub fn eval_expression(
                 if args.len() != 1 {
                     return Err(format!("{} operator expects exactly one argument, got {}", var.0, args.len()));
                 }
-                let arg_val = eval_expression(&args[0], funcs, vars).unwrap();
+                let arg_val = eval_expression(&args[0], funcs, vars)?;
                 if var.0 == "*" {
                     if arg_val == 0 {
                         return Err("Cannot decrement zero".to_string());
@@ -88,7 +88,7 @@ pub fn eval_expression(
 
                     let mut local_vars = VarTable { variables: HashMap::new() };
                     for (i, arg) in params.iter().enumerate() {
-                        let arg_val = eval_expression(arg, funcs, vars).unwrap();
+                        let arg_val = eval_expression(arg, funcs, vars)?;
                         local_vars.variables.insert(func.args[i].clone(), arg_val);
                     }
 
