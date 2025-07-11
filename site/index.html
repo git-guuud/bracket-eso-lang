@@ -16,7 +16,6 @@
 
             <h3>Numbers</h3>
             <ul>
-                <li>Represented as nested brackets</li>
                 <li>0 &rarr; <code>[]</code> (equivalent to group of no statements)</li>
                 <li>1 &rarr; <code>[()]</code></li>
                 <li>2 &rarr; <code>[()()]</code></li>
@@ -48,10 +47,22 @@
             <ul>
                 <li>Valid bracket nestings only, e.g. <code>()</code>, <code>(())</code>, <code>(()())</code>, <code>(()(()))</code>, etc.</li>
             </ul>
+            <h3>Try-Catch</h3>
+            <ul>
+                <li><code>&lt;try_block|catch_block&gt;</code> - if error is encountered while executing <code>try_block</code>, execution continues from <code>catch_block</code> instead.</li>
+            </ul>
+
+            <h3>Print</h3>
+            <ul>
+                <li><code>&lt;x&gt;</code> - print <code>x</code> as a number</li>
+                <li><code>&lt;x|&gt;</code> - print <code>x</code> as a character</li>
+            </ul>
         </div>
         <div id="right">
             <div id="bar">
-                <select id="examples"></select>
+                <select id="examples">
+                    <option disabled selected value> -- try an example -- </option>
+                </select>
                 <button id="clear">Clear</button>
                 <button id="run">Run</button>
             </div>

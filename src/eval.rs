@@ -116,6 +116,18 @@ pub fn eval_expression(
                 }
             }
         }
+
+        Expression::PrintChar(exp) => {
+            let val = eval_expression(exp, funcs, vars)?;
+            crate::logOutput(format!("{}", char::from_u32(val).unwrap_or('?')).as_str());
+            Ok(val)
+        }
+
+        Expression::PrintNum(exp) => {
+            let val = eval_expression(exp, funcs, vars)?;
+            crate::logOutput(format!("{}\n", val).as_str());
+            Ok(val)
+        }
     }
 }
                        

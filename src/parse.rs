@@ -51,6 +51,8 @@ pub enum Expression {
     FunctionCall(Var, Box<Expression>), // call function x with y as argument
     ListExp(Vec<Expression>), // List of expressions
     TryCatch(Box<Expression>, Box<Expression>), // try block and catch block
+    PrintNum(Box<Expression>), // Print val 
+    PrintChar(Box<Expression>), // Print char
 }
 
 impl fmt::Display for Expression {
@@ -80,6 +82,10 @@ impl fmt::Display for Expression {
                 write!(f, "try {{\n{}\n}} catch {{\n{}\n}}", try_block, catch_block)
             }
 
+            Expression::PrintNum(expr) => write!(f, "print_num({})", expr),
+            Expression::PrintChar(expr) => write!(f, "print_char({})", expr),
+
+
         }
     }
 }
@@ -87,8 +93,11 @@ impl fmt::Display for Expression {
 pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
     let mut tokens = Vec::new();
     let mut index = 0;
+    let mut in_comment = false;
     for c in input.chars() {
         match c {
+            '/' => in_comment = !in_comment,
+            _ if in_comment => continue, // Skip characters inside comments
             '(' => tokens.push(Token::OpenParen),
             ')' => tokens.push(Token::CloseParen),
             '[' => tokens.push(Token::OpenSquare),
@@ -243,13 +252,21 @@ pub fn get_next_expression(tokens: &Vec<Token>, start: usize) -> Result<(Express
                 if index >= tokens.len() {
                     return Err("Unexpected end of tokens after |".to_string());
                 }
+                if tokens[index] == Token::CloseAngle {
+                    index += 1;
+                    return Ok((Expression::PrintChar(Box::new(try_block)), index));
+                }
                 let (catch_block, end) = get_next_expression(tokens, index)?;
                 index = end;
                 if index >= tokens.len() || tokens[index] != Token::CloseAngle {
                     return Err(format!("Expected > at end of try-catch block at {}", index));
                 }
                 return Ok((Expression::TryCatch(Box::new(try_block), Box::new(catch_block)), index + 1));
-            } else {
+            } else if tokens[index] == Token::CloseAngle {
+                index += 1;
+                return Ok((Expression::PrintNum(Box::new(try_block)), index));
+            }
+            else {
                 return Err(format!("Expected | after try block at {}", index));
             }
         }

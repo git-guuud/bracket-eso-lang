@@ -32,7 +32,7 @@ pub fn eval_all(code: String) -> Result<String, String> {
         index = end; 
         // println!("{}", exp); 
         let x = eval::eval_expression(&exp, &mut funcs, &mut vars)?; 
-        output.push_str(format!("Result: {}", x).as_str()); 
+        output = format!("{}", x); 
     }
     Ok(output)
 }

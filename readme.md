@@ -28,6 +28,10 @@
 ## Try-Catch
 - `<try_block|catch_block>` - if error is encountered while executing `try_block`, execute continues from `catch_block` instead.
 
+## Print
+- `<x>` - print x as a number
+- `<x|>` - print x as a character
+
 ## Examples 
 ### addition (5+6)
 ```
