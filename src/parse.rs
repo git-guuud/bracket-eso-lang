@@ -13,8 +13,8 @@ pub enum Token {
     Pipe, // |
     Inc,
     Dec,
-    // OpenAngle, // <
-    // CloseAngle, // >
+    OpenAngle, // <
+    CloseAngle, // >
 }
 
 impl fmt::Display for Token {
@@ -29,8 +29,8 @@ impl fmt::Display for Token {
             Token::Pipe => write!(f, "|"),
             Token::Inc => write!(f, "&"),
             Token::Dec => write!(f, "*"),
-            // Token::OpenAngle => write!(f, "<"),
-            // Token::CloseAngle => write!(f, ">"),
+            Token::OpenAngle => write!(f, "<"),
+            Token::CloseAngle => write!(f, ">"),
         }
     }
 }
@@ -50,6 +50,7 @@ pub enum Expression {
     FunctionDef(Var, Vec<Var>, Box<Expression>), // define function x with y as argument and z as body
     FunctionCall(Var, Box<Expression>), // call function x with y as argument
     ListExp(Vec<Expression>), // List of expressions
+    TryCatch(Box<Expression>, Box<Expression>), // try block and catch block
 }
 
 impl fmt::Display for Expression {
@@ -74,6 +75,11 @@ impl fmt::Display for Expression {
                 }
             }
             Expression::ListExp(exprs) => write!(f, "{}", exprs.iter().map(|e| e.to_string()).collect::<Vec<String>>().join(";\n")),
+            
+            Expression::TryCatch(try_block, catch_block) => {
+                write!(f, "try {{\n{}\n}} catch {{\n{}\n}}", try_block, catch_block)
+            }
+
         }
     }
 }
@@ -92,8 +98,8 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
             '|' => tokens.push(Token::Pipe),
             '*' => tokens.push(Token::Dec),
             '&' => tokens.push(Token::Inc),
-            // '<' => tokens.push(Token::OpenAngle),
-            // '>' => tokens.push(Token::CloseAngle),
+            '<' => tokens.push(Token::OpenAngle),
+            '>' => tokens.push(Token::CloseAngle),
             _ => {
                 if !c.is_whitespace() {
                     return Err(format!("Unexpected character: {} at {}", c, index));
@@ -199,6 +205,7 @@ pub fn get_next_expression(tokens: &Vec<Token>, start: usize) -> Result<(Express
                                         Box::new(Expression::ListExp(then_branch)), 
                                         Box::new(Expression::ListExp(else_branch))), index));
         }
+        
         Token::Dec => {
             index+=1;
             if index >= tokens.len() {
@@ -209,6 +216,7 @@ pub fn get_next_expression(tokens: &Vec<Token>, start: usize) -> Result<(Express
             let body = Expression::ListExp(vec![body]);
             return Ok((Expression::FunctionCall(Var('*'.to_string()), Box::new(body)), index));
         }
+        
         Token::Inc => {
             index+=1;
             if index >= tokens.len() {
@@ -219,6 +227,33 @@ pub fn get_next_expression(tokens: &Vec<Token>, start: usize) -> Result<(Express
             let body = Expression::ListExp(vec![body]);
             return Ok((Expression::FunctionCall(Var('&'.to_string()), Box::new(body)), index));
         }
+        
+        Token::OpenAngle => {
+            index += 1;
+            if index >= tokens.len() {
+                return Err("Unexpected end of tokens after < ".to_string());
+            }
+            let (try_block, end) = get_next_expression(tokens, index)?;
+            index = end;
+            if index >= tokens.len() {
+                return Err("Unxpected end of tokens".to_string());
+            }
+            if tokens[index] == Token::Pipe {
+                index += 1;
+                if index >= tokens.len() {
+                    return Err("Unexpected end of tokens after |".to_string());
+                }
+                let (catch_block, end) = get_next_expression(tokens, index)?;
+                index = end;
+                if index >= tokens.len() || tokens[index] != Token::CloseAngle {
+                    return Err(format!("Expected > at end of try-catch block at {}", index));
+                }
+                return Ok((Expression::TryCatch(Box::new(try_block), Box::new(catch_block)), index + 1));
+            } else {
+                return Err(format!("Expected | after try block at {}", index));
+            }
+        }
+
         _ => return Err(format!("Unexpected token at {}", index)),
     }
 }

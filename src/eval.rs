@@ -106,6 +106,16 @@ pub fn eval_expression(
             }
             Ok(result)
         }
+
+        Expression::TryCatch(try_block, catch_block) => {
+            match eval_expression(try_block, funcs, vars) {
+                Ok(result) => Ok(result),
+                Err(err) => {
+                    crate::logOutput(format!("Warning!: Error caught in try block: {}\n", err).as_str());
+                    eval_expression(&catch_block, funcs, vars)
+                }
+            }
+        }
     }
 }
                        

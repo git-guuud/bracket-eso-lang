@@ -25,6 +25,9 @@
 ## Variable/Function Names
 - Valid bracket nestings only, e.g. `()`, `(())`, `(()())`, `(()(()))`, etc.
 
+## Try-Catch
+- `<try_block|catch_block>` - if error is encountered while executing `try_block`, execute continues from `catch_block` instead.
+
 ## Examples 
 ### addition (5+6)
 ```
