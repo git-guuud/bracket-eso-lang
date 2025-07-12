@@ -1,5 +1,9 @@
 # Bracket - an esoteric programming language 
 
+## Comments
+- Comments are written as `/` followed by the comment text and ending with `/`
+- `/This is a comment/` will be ignored by the interpreter.
+
 ## Numbers 
 - Represented as nested brackets
 - 0 -> [] (equivalent to group of no statements)
@@ -85,3 +89,11 @@
 
 {(()()())} [ [()()()()()()] [()()()()()()()()]] /mul(6,8)/
 ```
+
+
+# How to compile it yourself
+- Clone the repository
+- Run `cargo build --release --target web` in the root directory
+- Run `npm install ../pkg` in the `site` directory
+- Run `npm serve` in the `site` directory
+- And Done! That's it, you can now run the interpreter in your browser at `http://localhost:8080/` or `http://localhost:3000/` whichever is given by the `npm serve` command.
