@@ -86,13 +86,13 @@ pub fn eval_expression(
                         return Err(format!("Function {} expects {} arguments, got {}", var.0, func.args.len(), params.len()));
                     }
 
-                    let mut local_vars = VarTable { variables: HashMap::new() };
+                    let mut local_vars = Box::new(VarTable { variables: HashMap::new() });
                     for (i, arg) in params.iter().enumerate() {
                         let arg_val = eval_expression(arg, funcs, vars)?;
                         local_vars.variables.insert(func.args[i].clone(), arg_val);
                     }
 
-                    return eval_expression(&func.body, funcs, &mut local_vars);
+                    return eval_expression(&func.body, funcs, local_vars.as_mut());
                 } else {
                     return Err(format!("Expected a list of arguments for function call, got {}", args));
                 }

@@ -20,18 +20,18 @@ pub fn eval_all(code: String) -> Result<String, String> {
     let tokens = parse::tokenize(&code)?;
     // println!("{}", tokens.iter().map(|t| t.to_string()).collect::<Vec::<String>>().join(""));
     
-    let mut funcs = eval::FunctionTable{
+    let mut funcs = Box::new(eval::FunctionTable{
         functions: HashMap::new(),
-    };
-    let mut vars = eval::VarTable {
+    });
+    let mut vars = Box::new(eval::VarTable {
         variables: HashMap::new(),
-    };
+    });
     let mut index = 0;
     while index < tokens.len() {
         let (exp, end) = parse::get_next_expression(&tokens, index)?;
         index = end; 
         // println!("{}", exp); 
-        let x = eval::eval_expression(&exp, &mut funcs, &mut vars)?; 
+        let x = eval::eval_expression(&exp, funcs.as_mut(), vars.as_mut())?; 
         output = format!("{}", x); 
     }
     Ok(output)

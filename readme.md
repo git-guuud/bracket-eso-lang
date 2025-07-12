@@ -18,6 +18,8 @@
 - `{x}(y)[z]` - define function `x` with arguments `y` to return value `z`
 - `{x}[y]` - call function `x` with arguments `y`
 - statements can be grouped using `[]` (value of a group is the value of the last statement in it)
+- value of definition of variable is the value it is being set to.
+- value of definition of function is 0.
 
 ## Conditionals
 - `[x] | [y] | [z]` - if `x != 0` then `y` else `z`
@@ -31,6 +33,7 @@
 ## Print
 - `<x>` - print x as a number
 - `<x|>` - print x as a character
+- Value of the statement is the value of `x`
 
 ## Examples 
 ### addition (5+6)

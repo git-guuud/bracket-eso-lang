@@ -10,7 +10,7 @@ async function runCode() {
     }
     catch (e) {
         const output = document.getElementById('output');
-        output.value += "Stack overflow: Due to the reliance on recursion + small stack size of wasm, sadly the stack overflows too fast ;(\n";
+        output.value += "Stack overflow: Due to the reliance on recursion + small stack size of wasm, sadly the stack overflows too fast ;(\nPLEASE REFRESH THE PAGE!!\n";
         // output.value += e.toString() + '\n';
         return;
     }
@@ -24,6 +24,49 @@ document.getElementById('clear').addEventListener('click', () => {
 });
 
 let examples = {
+    'Hello, World!': `
+{()}() [
+    [()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()] /65 = 'A'/
+]
+{(())}() [
+    &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&[] /97 = 'a'/
+]
+<&&&&&&&{()}[]|> /H/
+<&&&&{(())}[]|> /e/
+<&&&&&&&&&&&{(())}[]|> /l/
+<&&&&&&&&&&&{(())}[]|> /l/
+<&&&&&&&&&&&&&&{(())}[]|> /o/
+<*********************{()}[]|> /, -> 44/
+<&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&[]|> /space -> 32/
+<&&&&&&&&&&&&&&&&&&&&&&{()}[]|> /W/
+<&&&&&&&&&&&&&&{(())}[]|> /o/
+<&&&&&&&&&&&&&&&&&{(())}[]|> /o/
+<&&&&&&&&&&&{(())}[]|> /l/
+<&&&{(())}[]|> /d/
+<&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&[]|> /! -> 33/
+<&&&&&&&&&&[]|> /newline/
+`,
+    'Is even?': `
+/function is_even(x)/
+{(())} ( () ) [
+    [{()}[]] |                          /if x is not 0/
+        [ {(()())} [ *{()}[] ] ]    /is_odd(x-1)/
+    |
+    [ [()] ]                  /else if x is 0 return 1(true)/
+]
+
+/function is_odd(x)/
+{(()())} ( () ) [
+    [{()}[]] |                          /if x is not 0/
+        [ {(())} [ *{()}[] ] ]    /is_even(x-1)/
+    |
+        [ [] ]                  /else if x is 0 return 0(false)/
+]
+
+<{(())} [ [()()()()()()()()] ]> /print is_even(8)/
+<{(())} [ [()()()()()()()()()()()] ]> /print is_even(11)/
+<{(()())} [ [()()()()()()()()()()()()()] ]> /print is_odd(13)/
+`,
     'addition': `
 /Define a function named (()()) to add two numbers let's say add(x,y)/
 
