@@ -19,7 +19,7 @@
     margin: 1% 1%;
     padding: 0 1%;
     background-color: #0E1B1B;
-    font-size: 16px;
+    font-size: 18px;
     overflow-y: scroll;
     scrollbar-width: thin;
     scrollbar-color: #508484 #0E1B1B;
@@ -39,14 +39,13 @@
     height: 45%;
     margin: auto;
     resize: none;
-    font-size: 20px;
     color: #FBF5F3;
     background-color: #0E1B1B;
     border: solid 2px #508484;
-    text-wrap: nowrap;
     padding-left: 5px;
     padding-top: 5px;
     outline: none;
+    text-wrap: nowrap;
 }
 
 #bar {
@@ -66,8 +65,9 @@
     cursor: pointer;
 }
 
-#run:hover, #clear:hover {
+#run:hover, #clear:hover, #examples:hover {
     background-color: #020B13;
+    border: solid 2px #508484;
 }
 
 #examples {
@@ -78,4 +78,5 @@
     border: none;
     font-size: 20px;
     cursor: pointer;
+    outline: none;
 }
